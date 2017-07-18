@@ -17,17 +17,7 @@
  
 package my.ch.task.example.example8;
 
-import static org.quartz.DateBuilder.dateOf;
-import static org.quartz.JobBuilder.newJob;
-import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
-import static org.quartz.TriggerBuilder.newTrigger;
-
-import org.quartz.JobDetail;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerFactory;
-import org.quartz.SchedulerMetaData;
-import org.quartz.SimpleTrigger;
-import org.quartz.examples.example2.SimpleJob;
+import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.calendar.AnnualCalendar;
 import org.slf4j.Logger;
@@ -36,6 +26,11 @@ import org.slf4j.LoggerFactory;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+
+import static org.quartz.DateBuilder.dateOf;
+import static org.quartz.JobBuilder.newJob;
+import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
+import static org.quartz.TriggerBuilder.newTrigger;
 
 /**
  * This example will demonstrate how calendars can be used to exclude periods of time when scheduling should not take

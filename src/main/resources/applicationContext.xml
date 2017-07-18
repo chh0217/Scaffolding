@@ -18,26 +18,65 @@
 <!-- @version $Id: applicationContext.xml 561608 2007-08-01 00:33:12Z vgritsenko $ -->
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:util="http://www.springframework.org/schema/util"
-       xmlns:configurator="http://cocoon.apache.org/schema/configurator"
-       xmlns:avalon="http://cocoon.apache.org/schema/avalon"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
-                           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd
-                           http://cocoon.apache.org/schema/configurator http://cocoon.apache.org/schema/configurator/cocoon-configurator-1.0.1.xsd
-                           http://cocoon.apache.org/schema/avalon http://cocoon.apache.org/schema/avalon/cocoon-avalon-1.0.xsd">
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:task="http://www.springframework.org/schema/task" xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
 
-  <!-- Activate Cocoon Spring Configurator -->
-  <configurator:settings/>
+  <context:property-placeholder ignore-resource-not-found="true"
+                                location="classpath*:/config.properties" />
+  <context:component-scan base-package="my.ch"/>
+  <!-- 开启@AspectJ AOP代理 -->
+  <aop:aspectj-autoproxy proxy-target-class="true"/>
+  <!-- 任务调度器 -->
+  <task:scheduler pool-size="10" id="scheduler"/>
+  <!-- 任务执行器 -->
+  <task:executor pool-size="10" id="executor"/>
+  <!--开启注解调度支持 @Async @Scheduled-->
+  <task:annotation-driven proxy-target-class="true" scheduler="scheduler" executor="executor"/>
+  <!--&lt;!&ndash; 名字必须是applicationEventMulticaster和messageSource是一样的，默认找这个名字的对象 &ndash;&gt;-->
+  <!--&lt;!&ndash; 名字必须是applicationEventMulticaster，因为AbstractApplicationContext默认找个 &ndash;&gt;-->
+  <!--&lt;!&ndash; 如果找不到就new一个，但不是异步调用而是同步调用 &ndash;&gt;-->
+  <!--<bean id="applicationEventMulticaster" class="org.springframework.context.event.SimpleApplicationEventMulticaster">-->
+    <!--&lt;!&ndash; 注入任务执行器 这样就实现了异步调用（缺点是全局的，要么全部异步，要么全部同步（删除这个属性即是同步））  &ndash;&gt;-->
+    <!--<property name="taskExecutor" ref="executor"/>-->
+  <!--</bean>-->
+  <!--
+   配置数据源
+   destroy-method="close"的作用是当数据库连接不使用的时候,就把该连接重新放到数据池中,方便下次使用调用
+  -->
+  <!--<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">-->
+    <!--&lt;!&ndash; Connection Info &ndash;&gt;-->
+    <!--<property name="driverClassName" value="${jdbc.driver}" />-->
+    <!--<property name="url" value="${jdbc.url}" />-->
+    <!--<property name="username" value="${jdbc.username}" />-->
+    <!--<property name="password" value="${jdbc.password}" />-->
+    <!--<property name="maxActive" value="${jdbc.pool.maxActive}" />-->
+    <!--<property name="minIdle" value="0" />-->
+    <!--<property name="defaultAutoCommit" value="false" />-->
+    <!--&lt;!&ndash; 连接Idle10分钟后超时，每1分钟检查一次 &ndash;&gt;-->
+    <!--<property name="timeBetweenEvictionRunsMillis" value="60000" />-->
+    <!--<property name="minEvictableIdleTimeMillis" value="600000" />-->
+    <!--<property name="filters" value="stat" />-->
+  <!--</bean>-->
 
-  <!-- Configure Log4j -->
-  <bean name="org.apache.cocoon.spring.configurator.log4j"
-        class="org.apache.cocoon.spring.configurator.log4j.Log4JConfigurator"
-        scope="singleton">
-    <property name="settings" ref="org.apache.cocoon.configuration.Settings"/>
-    <property name="resource" value="/WEB-INF/log4j.xml"/>
-  </bean>
-
-  <!-- Activate Avalon Bridge -->
-  <avalon:bridge/>
-
+  <!--<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">-->
+    <!--<property name="dataSource" ref="dataSource" />-->
+    <!--&lt;!&ndash; 自动扫描entity目录, 省掉Configuration.xml里的手工配置 &ndash;&gt;-->
+    <!--<property name="typeAliasesPackage" value="my.ch.spring.cache.domain" />-->
+    <!--&lt;!&ndash; 显式指定Mapper文件位置 &ndash;&gt;-->
+    <!--<property name="mapperLocations" value="classpath:/mybatis/*Mapper.xml" />-->
+    <!--&lt;!&ndash; 显式配置Configuration &ndash;&gt;-->
+    <!--<property name="configLocation" value="classpath:/mybatis-config.xml"/>-->
+  <!--</bean>-->
+  <!--<bean id="transactionManager"-->
+        <!--class="org.springframework.jdbc.datasource.DataSourceTransactionManager">-->
+    <!--<property name="dataSource" ref="dataSource" />-->
+  <!--</bean>-->
+  <!--<context:component-scan-->
+          <!--base-package="my.ch.spring.cache">-->
+  <!--</context:component-scan>-->
+  <!--<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">-->
+    <!--<property name="basePackage" value="my.ch.spring.cache.dao" />-->
+  <!--</bean>-->
+  <!--<import resource="redis/redis-config.xml"/>-->
 </beans>
